@@ -5,12 +5,18 @@ import {
   Tabs,
   Tab,
   Chip,
+  Button,
   CircularProgress,
   Alert,
 } from '@mui/material';
+import { Add } from '@mui/icons-material';
 import { useAuthStore } from '@/features/auth/model/useAuthStore';
 import { selectUser } from '@/features/auth/model/selectors';
 import { useTrainingProgramsQuery } from '../api/useTrainingQueries';
+import { useIsMobile } from '@/shared/hooks/useIsMobile';
+import { ExerciseTable } from './ExerciseTable';
+import { ExerciseList } from './ExerciseList';
+import type { Exercise } from '@/entities/training/types';
 import {
   TRAINING_GOAL_LABELS,
   TRAINING_LEVEL_LABELS,
@@ -20,6 +26,22 @@ export const TrainingPage = () => {
   const user = useAuthStore(selectUser);
   const { data: programs, isLoading, error } = useTrainingProgramsQuery(user?.id ?? '');
   const [selectedDay, setSelectedDay] = useState(0);
+  const isMobile = useIsMobile();
+
+  const handleEdit = (exercise: Exercise) => {
+    // FP-7: drawer
+    console.log('edit', exercise);
+  };
+
+  const handleDelete = (exerciseId: string) => {
+    // FP-7: confirm + delete
+    console.log('delete', exerciseId);
+  };
+
+  const handleAdd = () => {
+    // FP-7: drawer
+    console.log('add');
+  };
 
   if (isLoading) {
     return (
@@ -105,16 +127,38 @@ export const TrainingPage = () => {
 
       {currentDay && (
         <Box>
-          <Typography variant="h4" gutterBottom>
-            {currentDay.title}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {currentDay.dayOfWeek} · {currentDay.exercises.length} упражнений
-          </Typography>
-          {/* Таблица упражнений будет в FP-6 */}
-          <Typography variant="body2" color="text.secondary">
-            Таблица упражнений — следующая задача
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box>
+              <Typography variant="h4" gutterBottom>
+                {currentDay.title}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {currentDay.dayOfWeek} · {currentDay.exercises.length} упражнений
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={handleAdd}
+              size={isMobile ? 'small' : 'medium'}
+            >
+              {isMobile ? 'Добавить' : 'Добавить упражнение'}
+            </Button>
+          </Box>
+
+          {isMobile ? (
+            <ExerciseList
+              exercises={currentDay.exercises}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ) : (
+            <ExerciseTable
+              exercises={currentDay.exercises}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </Box>
       )}
     </Box>
