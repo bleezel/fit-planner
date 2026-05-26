@@ -4,13 +4,16 @@ import {
   TextField,
   MenuItem,
   InputAdornment,
-  IconButton,
-  Tooltip,
 } from '@mui/material';
 import { Search, Edit, Delete } from '@mui/icons-material';
-import { DataGridPro, type GridColDef } from '@mui/x-data-grid-pro';
+import {
+  DataGridPro,
+  GridActionsCellItem,
+  type GridColDef,
+} from '@mui/x-data-grid-pro';
 import type { Exercise, MuscleGroup } from '@/entities/training/types';
 import { MUSCLE_GROUP_LABELS } from '@/shared/constants/dictionaries';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 
 type ExerciseTableProps = {
   exercises: Exercise[];
@@ -21,6 +24,7 @@ type ExerciseTableProps = {
 export const ExerciseTable = ({ exercises, onEdit, onDelete }: ExerciseTableProps) => {
   const [search, setSearch] = useState('');
   const [muscleFilter, setMuscleFilter] = useState<string>('all');
+  const [deleteTarget, setDeleteTarget] = useState<Exercise | null>(null);
 
   const filtered = exercises.filter((ex) => {
     const matchesSearch = ex.name.toLowerCase().includes(search.toLowerCase());
@@ -76,24 +80,23 @@ export const ExerciseTable = ({ exercises, onEdit, onDelete }: ExerciseTableProp
     },
     {
       field: 'actions',
+      type: 'actions',
       headerName: '',
-      width: 90,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <Tooltip title="Редактировать">
-            <IconButton size="small" onClick={() => onEdit(params.row)}>
-              <Edit fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Удалить">
-            <IconButton size="small" onClick={() => onDelete(params.row.id)}>
-              <Delete fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
+      width: 50,
+      getActions: (params) => [
+        <GridActionsCellItem
+          icon={<Edit />}
+          label="Редактировать"
+          onClick={() => onEdit(params.row)}
+          showInMenu
+        />,
+        <GridActionsCellItem
+          icon={<Delete />}
+          label="Удалить"
+          onClick={() => setDeleteTarget(params.row)}
+          showInMenu
+        />,
+      ],
     },
   ];
 
@@ -156,6 +159,13 @@ export const ExerciseTable = ({ exercises, onEdit, onDelete }: ExerciseTableProp
         localeText={{
           noRowsLabel: 'Нет упражнений',
         }}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        message={`Удалить упражнение "${deleteTarget?.name}"?`}
+        onConfirm={() => { if (deleteTarget) onDelete(deleteTarget.id); setDeleteTarget(null); }}
+        onCancel={() => setDeleteTarget(null)}
       />
     </Box>
   );
