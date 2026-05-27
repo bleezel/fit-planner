@@ -18,7 +18,7 @@ import {
 import { Search, Close, Add } from '@mui/icons-material';
 import { mockExerciseCatalog } from '@/mocks/exerciseCatalog';
 import type { CatalogExercise } from '@/entities/training/catalogTypes';
-import { MUSCLE_GROUP_LABELS } from '@/shared/constants/dictionaries';
+import { MUSCLE_GROUP_LABELS, EQUIPMENT_LABELS } from '@/shared/constants/dictionaries';
 import { useIsMobile } from '@/shared/hooks/useIsMobile';
 
 type ExerciseCatalogModalProps = {
@@ -36,18 +36,21 @@ export const ExerciseCatalogModal = ({
 }: ExerciseCatalogModalProps) => {
   const [search, setSearch] = useState('');
   const [muscleFilter, setMuscleFilter] = useState<string>('all');
+  const [equipmentFilter, setEquipmentFilter] = useState<string>('all');
   const isMobile = useIsMobile();
 
   const filtered = mockExerciseCatalog.filter((ex) => {
     const matchesSearch = ex.name.toLowerCase().includes(search.toLowerCase());
     const matchesMuscle = muscleFilter === 'all' || ex.muscleGroup === muscleFilter;
-    return matchesSearch && matchesMuscle;
+    const matchesEquipment = equipmentFilter === 'all' || ex.equipment === equipmentFilter;
+    return matchesSearch && matchesMuscle && matchesEquipment;
   });
 
   const handleSelect = (exercise: CatalogExercise) => {
     onSelect(exercise);
     setSearch('');
     setMuscleFilter('all');
+    setEquipmentFilter('all');
   };
 
   return (
@@ -88,10 +91,24 @@ export const ExerciseCatalogModal = ({
             size="small"
             value={muscleFilter}
             onChange={(e) => setMuscleFilter(e.target.value)}
-            sx={{ minWidth: 160 }}
+            sx={{ minWidth: 150 }}
           >
             <MenuItem value="all">Все группы</MenuItem>
             {Object.entries(MUSCLE_GROUP_LABELS).map(([value, label]) => (
+              <MenuItem key={value} value={value}>
+                {label}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            select
+            size="small"
+            value={equipmentFilter}
+            onChange={(e) => setEquipmentFilter(e.target.value)}
+            sx={{ minWidth: 150 }}
+          >
+            <MenuItem value="all">Всё оборудование</MenuItem>
+            {Object.entries(EQUIPMENT_LABELS).map(([value, label]) => (
               <MenuItem key={value} value={value}>
                 {label}
               </MenuItem>
@@ -124,12 +141,18 @@ export const ExerciseCatalogModal = ({
                 <ListItemText
                   primary={exercise.name}
                   secondary={
-                    <Chip
-                      label={MUSCLE_GROUP_LABELS[exercise.muscleGroup]}
-                      size="small"
-                      color="primary"
-                      sx={{ mt: 0.5 }}
-                    />
+                    <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
+                      <Chip
+                        label={MUSCLE_GROUP_LABELS[exercise.muscleGroup]}
+                        size="small"
+                        color="primary"
+                      />
+                      <Chip
+                        label={EQUIPMENT_LABELS[exercise.equipment]}
+                        size="small"
+                        variant="outlined"
+                      />
+                    </Box>
                   }
                 />
               </ListItemButton>

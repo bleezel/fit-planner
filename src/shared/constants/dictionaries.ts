@@ -1,4 +1,5 @@
 import type { MuscleGroup, TrainingGoal, TrainingLevel } from '@/entities/training/types';
+import type { Equipment } from '@/entities/training/catalogTypes';
 
 export const TRAINING_GOAL_LABELS: Record<TrainingGoal, string> = {
   hypertrophy: 'Гипертрофия',
@@ -26,3 +27,13 @@ export const MUSCLE_GROUP_LABELS: Record<MuscleGroup, string> = {
 export const MUSCLE_GROUP_OPTIONS = Object.entries(MUSCLE_GROUP_LABELS).map(
   ([value, label]) => ({ value, label }),
 );
+
+export const EQUIPMENT_LABELS: Record<Equipment, string> = {
+  barbell: 'Штанга',
+  dumbbell: 'Гантели',
+  machine: 'Тренажёр',
+  cable: 'Кроссовер',
+  bodyweight: 'Своё тело',
+  band: 'Резинка',
+  other: 'Другое',
+};
