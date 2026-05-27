@@ -10,12 +10,19 @@ import {
   Alert,
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
+import { useSnackbar } from 'notistack';
 import { useAuthStore } from '@/features/auth/model/useAuthStore';
 import { selectUser } from '@/features/auth/model/selectors';
-import { useTrainingProgramsQuery } from '../api/useTrainingQueries';
+import {
+  useTrainingProgramsQuery,
+  useAddExerciseMutation,
+  useUpdateExerciseMutation,
+  useDeleteExerciseMutation,
+} from '../api/useTrainingQueries';
 import { useIsMobile } from '@/shared/hooks/useIsMobile';
 import { ExerciseTable } from './ExerciseTable';
 import { ExerciseList } from './ExerciseList';
+import { ExerciseDrawer } from './ExerciseDrawer';
 import type { Exercise } from '@/entities/training/types';
 import {
   TRAINING_GOAL_LABELS,
@@ -27,20 +34,70 @@ export const TrainingPage = () => {
   const { data: programs, isLoading, error } = useTrainingProgramsQuery(user?.id ?? '');
   const [selectedDay, setSelectedDay] = useState(0);
   const isMobile = useIsMobile();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+
+  const addMutation = useAddExerciseMutation();
+  const updateMutation = useUpdateExerciseMutation();
+  const deleteMutation = useDeleteExerciseMutation();
+
+  const program = programs?.[0];
+  const currentDay = program?.days[selectedDay];
+
+  const handleAdd = () => {
+    setEditingExercise(null);
+    setDrawerOpen(true);
+  };
 
   const handleEdit = (exercise: Exercise) => {
-    // FP-7: drawer
-    console.log('edit', exercise);
+    setEditingExercise(exercise);
+    setDrawerOpen(true);
   };
 
   const handleDelete = (exerciseId: string) => {
-    // FP-7: confirm + delete
-    console.log('delete', exerciseId);
+    if (!program || !currentDay) return;
+    deleteMutation.mutate(
+      { programId: program.id, dayId: currentDay.id, exerciseId },
+      {
+        onSuccess: () => enqueueSnackbar('Упражнение удалено', { variant: 'success' }),
+        onError: () => enqueueSnackbar('Ошибка удаления', { variant: 'error' }),
+      },
+    );
   };
 
-  const handleAdd = () => {
-    // FP-7: drawer
-    console.log('add');
+  const handleSave = (values: Omit<Exercise, 'id'>) => {
+    if (!program || !currentDay) return;
+
+    if (editingExercise) {
+      updateMutation.mutate(
+        {
+          programId: program.id,
+          dayId: currentDay.id,
+          exerciseId: editingExercise.id,
+          updates: values,
+        },
+        {
+          onSuccess: () => {
+            enqueueSnackbar('Упражнение обновлено', { variant: 'success' });
+            setDrawerOpen(false);
+          },
+          onError: () => enqueueSnackbar('Ошибка сохранения', { variant: 'error' }),
+        },
+      );
+    } else {
+      addMutation.mutate(
+        { programId: program.id, dayId: currentDay.id, exercise: values },
+        {
+          onSuccess: () => {
+            enqueueSnackbar('Упражнение добавлено', { variant: 'success' });
+            setDrawerOpen(false);
+          },
+          onError: () => enqueueSnackbar('Ошибка добавления', { variant: 'error' }),
+        },
+      );
+    }
   };
 
   if (isLoading) {
@@ -59,8 +116,6 @@ export const TrainingPage = () => {
     );
   }
 
-  const program = programs?.[0];
-
   if (!program) {
     return (
       <Box sx={{ py: 4, textAlign: 'center' }}>
@@ -73,8 +128,6 @@ export const TrainingPage = () => {
       </Box>
     );
   }
-
-  const currentDay = program.days[selectedDay];
 
   return (
     <Box>
@@ -161,6 +214,14 @@ export const TrainingPage = () => {
           )}
         </Box>
       )}
+
+      <ExerciseDrawer
+        open={drawerOpen}
+        exercise={editingExercise}
+        onClose={() => setDrawerOpen(false)}
+        onSave={handleSave}
+        loading={addMutation.isPending || updateMutation.isPending}
+      />
     </Box>
   );
 };
