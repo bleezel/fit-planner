@@ -1,10 +1,9 @@
 import { AppBar, Toolbar, Typography, IconButton, Box } from '@mui/material';
 import { Logout } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/features/auth/model/useAuthStore';
-import { selectUser } from '@/features/auth/model/selectors';
+import { useAuthStore, selectUser } from '@/features/auth/model';
 import { ROUTES } from '@/shared/constants/routes';
-import { SIDEBAR_WIDTH } from '@/widgets/sidebar/Sidebar';
+import { SIDEBAR_WIDTH } from '@/widgets/sidebar';
 
 export const Header = () => {
   const user = useAuthStore(selectUser);

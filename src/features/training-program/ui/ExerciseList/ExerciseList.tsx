@@ -3,7 +3,7 @@ import { Box, TextField, MenuItem, InputAdornment, Typography } from '@mui/mater
 import { Search } from '@mui/icons-material';
 import type { Exercise } from '@/entities/training/types';
 import { MUSCLE_GROUP_LABELS } from '@/shared/constants/dictionaries';
-import { ExerciseCard } from './ExerciseCard';
+import { ExerciseCard } from '@/features/training-program/ui/ExerciseCard';
 
 type ExerciseListProps = {
   exercises: Exercise[];

@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import ThemeProvider from './theme';
-import { QueryProvider } from './app/providers/QueryProvider';
-import { SnackbarProvider } from './app/providers/SnackbarProvider';
-import { LoginPage } from './features/auth/ui/LoginPage';
-import { ProtectedRoute } from './features/auth/ui/ProtectedRoute';
-import { AppLayout } from './widgets/app-layout/AppLayout';
-import { TrainingPage } from './features/training-program/ui/TrainingPage';
-import { ROUTES } from './shared/constants/routes';
+import ThemeProvider from '@/theme';
+import { QueryProvider } from '@/app/providers/QueryProvider';
+import { SnackbarProvider } from '@/app/providers/SnackbarProvider';
+import { LoginPage } from '@/features/auth/ui/LoginPage';
+import { ProtectedRoute } from '@/features/auth/ui/ProtectedRoute';
+import { AppLayout } from '@/widgets/app-layout';
+import { TrainingPage } from '@/features/training-program/ui/TrainingPage';
+import { ROUTES } from '@/shared/constants/routes';
 
 function App() {
   return (

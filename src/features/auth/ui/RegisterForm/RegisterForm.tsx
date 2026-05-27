@@ -10,8 +10,8 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
-import { useAuthStore } from '../model/useAuthStore';
-import { authApi } from '../api/authApi';
+import { useAuthStore } from '@/features/auth/model';
+import { authApi } from '@/features/auth/api';
 import { ROUTES } from '@/shared/constants/routes';
 
 type RegisterFormValues = {
