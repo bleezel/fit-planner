@@ -1,0 +1,1 @@
+export { ExerciseCatalogModal } from './ExerciseCatalogModal';

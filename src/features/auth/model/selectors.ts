@@ -1,4 +1,4 @@
-import type { AuthUser } from '../api/authApi';
+import type { AuthUser } from '@/features/auth/api';
 
 type AuthState = {
   user: AuthUser | null;

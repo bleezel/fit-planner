@@ -1,23 +1,15 @@
 import { useState } from 'react';
 import { Box, Card, CardContent, Typography, Tabs, Tab } from '@mui/material';
 import { FitnessCenter } from '@mui/icons-material';
-import { LoginForm } from './LoginForm';
-import { RegisterForm } from './RegisterForm';
+import { LoginForm } from '@/features/auth/ui/LoginForm';
+import { RegisterForm } from '@/features/auth/ui/RegisterForm';
+import { PageWrapper } from './styles';
 
 export const LoginPage = () => {
   const [tab, setTab] = useState(0);
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        bgcolor: 'background.default',
-        p: 2,
-      }}
-    >
+    <PageWrapper>
       <Card sx={{ maxWidth: 420, width: '100%' }}>
         <CardContent sx={{ p: 4 }}>
           <Box sx={{ textAlign: 'center', mb: 3 }}>
@@ -42,6 +34,6 @@ export const LoginPage = () => {
           {tab === 0 ? <LoginForm /> : <RegisterForm />}
         </CardContent>
       </Card>
-    </Box>
+    </PageWrapper>
   );
 };

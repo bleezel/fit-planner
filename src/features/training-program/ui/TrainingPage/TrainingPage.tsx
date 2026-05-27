@@ -11,20 +11,19 @@ import {
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
-import { useAuthStore } from '@/features/auth/model/useAuthStore';
-import { selectUser } from '@/features/auth/model/selectors';
+import { useAuthStore, selectUser } from '@/features/auth/model';
 import {
   useTrainingProgramsQuery,
   useAddExerciseMutation,
   useUpdateExerciseMutation,
   useDeleteExerciseMutation,
-} from '../api/useTrainingQueries';
+} from '@/features/training-program/api/useTrainingQueries';
 import { useIsMobile } from '@/shared/hooks/useIsMobile';
-import { ExerciseTable } from './ExerciseTable';
-import { ExerciseList } from './ExerciseList';
-import { ExerciseDrawer } from './ExerciseDrawer';
-import { ExerciseCatalogModal } from './ExerciseCatalogModal';
-import { AddExerciseDrawer } from './AddExerciseDrawer';
+import { ExerciseTable } from '@/features/training-program/ui/ExerciseTable';
+import { ExerciseList } from '@/features/training-program/ui/ExerciseList';
+import { ExerciseDrawer } from '@/features/training-program/ui/ExerciseDrawer';
+import { ExerciseCatalogModal } from '@/features/training-program/ui/ExerciseCatalogModal';
+import { AddExerciseDrawer } from '@/features/training-program/ui/AddExerciseDrawer';
 import type { Exercise } from '@/entities/training/types';
 import type { CatalogExercise } from '@/entities/training/catalogTypes';
 import {

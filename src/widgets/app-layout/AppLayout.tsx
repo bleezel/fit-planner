@@ -1,8 +1,8 @@
 import { Box, Toolbar } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import { Sidebar, SIDEBAR_WIDTH } from '@/widgets/sidebar/Sidebar';
-import { Header } from '@/widgets/header/Header';
-import { MobileNavigation } from '@/widgets/mobile-navigation/MobileNavigation';
+import { Sidebar, SIDEBAR_WIDTH } from '@/widgets/sidebar';
+import { Header } from '@/widgets/header';
+import { MobileNavigation } from '@/widgets/mobile-navigation';
 
 export const AppLayout = () => {
   return (
