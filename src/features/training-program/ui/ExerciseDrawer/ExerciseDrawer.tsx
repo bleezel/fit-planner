@@ -11,12 +11,14 @@ import {
 import { Close } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import type { Exercise, MuscleGroup } from '@/entities/training/types';
-import { MUSCLE_GROUP_LABELS } from '@/shared/constants/dictionaries';
+import type { Equipment } from '@/entities/training/catalogTypes';
+import { MUSCLE_GROUP_LABELS, EQUIPMENT_LABELS } from '@/shared/constants/dictionaries';
 import { useIsMobile } from '@/shared/hooks/useIsMobile';
 
 type ExerciseFormValues = {
   name: string;
   muscleGroup: MuscleGroup | '';
+  equipment: Equipment | '';
   sets: number;
   reps: string;
   weight: string;
@@ -35,6 +37,7 @@ type ExerciseDrawerProps = {
 const getDefaultValues = (exercise: Exercise | null): ExerciseFormValues => ({
   name: exercise?.name ?? '',
   muscleGroup: exercise?.muscleGroup ?? '',
+  equipment: '',
   sets: exercise?.sets ?? 3,
   reps: exercise?.reps ?? '',
   weight: exercise?.weight ?? '',
@@ -127,6 +130,28 @@ export const ExerciseDrawer = ({
               helperText={errors.muscleGroup?.message}
             >
               {Object.entries(MUSCLE_GROUP_LABELS).map(([value, label]) => (
+                <MenuItem key={value} value={value}>
+                  {label}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+        />
+
+        <Controller
+          name="equipment"
+          control={control}
+          rules={{ required: 'Выберите оборудование' }}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              select
+              label="Оборудование"
+              fullWidth
+              error={!!errors.equipment}
+              helperText={errors.equipment?.message}
+            >
+              {Object.entries(EQUIPMENT_LABELS).map(([value, label]) => (
                 <MenuItem key={value} value={value}>
                   {label}
                 </MenuItem>
