@@ -23,7 +23,10 @@ import { useIsMobile } from '@/shared/hooks/useIsMobile';
 import { ExerciseTable } from './ExerciseTable';
 import { ExerciseList } from './ExerciseList';
 import { ExerciseDrawer } from './ExerciseDrawer';
+import { ExerciseCatalogModal } from './ExerciseCatalogModal';
+import { AddExerciseDrawer } from './AddExerciseDrawer';
 import type { Exercise } from '@/entities/training/types';
+import type { CatalogExercise } from '@/entities/training/catalogTypes';
 import {
   TRAINING_GOAL_LABELS,
   TRAINING_LEVEL_LABELS,
@@ -36,8 +39,17 @@ export const TrainingPage = () => {
   const isMobile = useIsMobile();
   const { enqueueSnackbar } = useSnackbar();
 
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Редактирование существующего
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+
+  // Добавление из каталога
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const [addDrawerOpen, setAddDrawerOpen] = useState(false);
+  const [selectedCatalogExercise, setSelectedCatalogExercise] = useState<CatalogExercise | null>(null);
+
+  // Создание нового в каталог
+  const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
 
   const addMutation = useAddExerciseMutation();
   const updateMutation = useUpdateExerciseMutation();
@@ -47,13 +59,80 @@ export const TrainingPage = () => {
   const currentDay = program?.days[selectedDay];
 
   const handleAdd = () => {
-    setEditingExercise(null);
-    setDrawerOpen(true);
+    setCatalogOpen(true);
+  };
+
+  const handleCatalogSelect = (exercise: CatalogExercise) => {
+    setSelectedCatalogExercise(exercise);
+    setCatalogOpen(false);
+    setAddDrawerOpen(true);
+  };
+
+  const handleCreateNew = () => {
+    setCatalogOpen(false);
+    setCreateDrawerOpen(true);
+  };
+
+  const handleAddFromCatalog = (values: { sets: number; reps: string; weight: string; restSeconds: number; notes: string }) => {
+    if (!program || !currentDay || !selectedCatalogExercise) return;
+    addMutation.mutate(
+      {
+        programId: program.id,
+        dayId: currentDay.id,
+        exercise: {
+          name: selectedCatalogExercise.name,
+          muscleGroup: selectedCatalogExercise.muscleGroup,
+          ...values,
+          notes: values.notes || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          enqueueSnackbar('Упражнение добавлено', { variant: 'success' });
+          setAddDrawerOpen(false);
+          setSelectedCatalogExercise(null);
+        },
+        onError: () => enqueueSnackbar('Ошибка добавления', { variant: 'error' }),
+      },
+    );
+  };
+
+  const handleCreateSave = (values: Omit<Exercise, 'id'>) => {
+    if (!program || !currentDay) return;
+    addMutation.mutate(
+      { programId: program.id, dayId: currentDay.id, exercise: values },
+      {
+        onSuccess: () => {
+          enqueueSnackbar('Упражнение создано и добавлено', { variant: 'success' });
+          setCreateDrawerOpen(false);
+        },
+        onError: () => enqueueSnackbar('Ошибка создания', { variant: 'error' }),
+      },
+    );
   };
 
   const handleEdit = (exercise: Exercise) => {
     setEditingExercise(exercise);
-    setDrawerOpen(true);
+    setEditDrawerOpen(true);
+  };
+
+  const handleEditSave = (values: Omit<Exercise, 'id'>) => {
+    if (!program || !currentDay || !editingExercise) return;
+    updateMutation.mutate(
+      {
+        programId: program.id,
+        dayId: currentDay.id,
+        exerciseId: editingExercise.id,
+        updates: values,
+      },
+      {
+        onSuccess: () => {
+          enqueueSnackbar('Упражнение обновлено', { variant: 'success' });
+          setEditDrawerOpen(false);
+        },
+        onError: () => enqueueSnackbar('Ошибка сохранения', { variant: 'error' }),
+      },
+    );
   };
 
   const handleDelete = (exerciseId: string) => {
@@ -65,39 +144,6 @@ export const TrainingPage = () => {
         onError: () => enqueueSnackbar('Ошибка удаления', { variant: 'error' }),
       },
     );
-  };
-
-  const handleSave = (values: Omit<Exercise, 'id'>) => {
-    if (!program || !currentDay) return;
-
-    if (editingExercise) {
-      updateMutation.mutate(
-        {
-          programId: program.id,
-          dayId: currentDay.id,
-          exerciseId: editingExercise.id,
-          updates: values,
-        },
-        {
-          onSuccess: () => {
-            enqueueSnackbar('Упражнение обновлено', { variant: 'success' });
-            setDrawerOpen(false);
-          },
-          onError: () => enqueueSnackbar('Ошибка сохранения', { variant: 'error' }),
-        },
-      );
-    } else {
-      addMutation.mutate(
-        { programId: program.id, dayId: currentDay.id, exercise: values },
-        {
-          onSuccess: () => {
-            enqueueSnackbar('Упражнение добавлено', { variant: 'success' });
-            setDrawerOpen(false);
-          },
-          onError: () => enqueueSnackbar('Ошибка добавления', { variant: 'error' }),
-        },
-      );
-    }
   };
 
   if (isLoading) {
@@ -215,12 +261,35 @@ export const TrainingPage = () => {
         </Box>
       )}
 
+      <ExerciseCatalogModal
+        open={catalogOpen}
+        onClose={() => setCatalogOpen(false)}
+        onSelect={handleCatalogSelect}
+        onCreateNew={handleCreateNew}
+      />
+
+      <AddExerciseDrawer
+        open={addDrawerOpen}
+        catalogExercise={selectedCatalogExercise}
+        onClose={() => setAddDrawerOpen(false)}
+        onSave={handleAddFromCatalog}
+        loading={addMutation.isPending}
+      />
+
       <ExerciseDrawer
-        open={drawerOpen}
+        open={createDrawerOpen}
+        exercise={null}
+        onClose={() => setCreateDrawerOpen(false)}
+        onSave={handleCreateSave}
+        loading={addMutation.isPending}
+      />
+
+      <ExerciseDrawer
+        open={editDrawerOpen}
         exercise={editingExercise}
-        onClose={() => setDrawerOpen(false)}
-        onSave={handleSave}
-        loading={addMutation.isPending || updateMutation.isPending}
+        onClose={() => setEditDrawerOpen(false)}
+        onSave={handleEditSave}
+        loading={updateMutation.isPending}
       />
     </Box>
   );
